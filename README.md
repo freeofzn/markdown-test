@@ -14,3 +14,6 @@
 
 ### 이미지 올리기
 ![캡처](https://github.com/freeofzn/markdown-test/assets/109016868/19f8c3a7-f8ae-401f-8cd4-25e3dcb771af)
+
+### 링크
+[구글](http://www.google.co.kr)
