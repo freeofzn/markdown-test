@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</Console>
+		<File name="file_java.sql"
+			fileName="./logs/file/file_java.sql.log" append="false">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</File>
+		<File name="file_egovframework"
+			fileName="./logs/file/file_egovframework.log" append="false">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</File>
+		<File name="file_jdbc.sqltiming"
+			fileName="./logs/file/file_jdbc.sqltiming.log" append="false">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</File>
+		<File name="file_org.springframework"
+			fileName="./logs/file/file_org.springframework.log" append="false">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</File>
+		<File name="file_Root" fileName="./logs/file/file_Root.log"
+			append="false">
+			<PatternLayout pattern="%d %5p [%c] %m%n" />
+		</File>
+	</Appenders>
+	
+  <!--개발용 -->
+	<Loggers>
+		<Logger name="java.sql" level="DEBUG" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="file_java.sql" />
+		</Logger>
+		<Logger name="egovframework" level="INFO" additivity="false">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="file_egovframework" />
+		</Logger>
+		<logger name="jdbc.sqltiming" level="INFO" additivity="false">
+			<appender-ref ref="console" />
+			<AppenderRef ref="file_jdbc.sqltiming" />
+		</logger>
+		<logger name="org.springframework" level="INFO"
+			additivity="false">
+			<appender-ref ref="console" />
+			<AppenderRef ref="file_org.springframework" />
+		</logger>
+		<Root level="DEBUG">
+			<AppenderRef ref="console" />
+			<AppenderRef ref="file_Root" />
+		</Root>
+	</Loggers>
+</Configuration>
