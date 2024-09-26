@@ -1,3 +1,5 @@
+// 스프링부트 CORS 처리
+
 package com.example.demo;
 
 import java.io.IOException;
