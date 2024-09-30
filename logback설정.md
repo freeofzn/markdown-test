@@ -1,44 +1,62 @@
-## springboot 에서 logback log 사용하기
 
-1. spring web 의존성 설치시 logback 이 포함되어 있어 사용가능
+# Spring Boot에서 Logback 로그 설정 및 log4jdbc를 사용한 쿼리 로깅
 
-2. lombok 이 설치되어 있다면 클래스 위에 @Slf4j 어노테이션 붙이고
+## 1. Logback 기본 설정
+Spring Boot는 기본적으로 `logback`이 포함되어 있어, 별도의 추가 설치 없이 바로 사용할 수 있습니다. `lombok` 라이브러리를 사용 중이라면, 클래스 상단에 `@Slf4j` 어노테이션을 추가하여 쉽게 로그를 사용할 수 있습니다.
 
-3. 로그사용
+```java
+@Slf4j
+public class ExampleClass {
+    public void logExample(int num) {
+        log.info("num check: {}", num);  // 문자열 결합 시 + 대신 {} 사용
+    }
+}
+```
 
-log.info("num check: {}", num);  // + 로 하지말고 {} 로 할것
+## 2. log4jdbc를 사용한 쿼리 로깅
 
-## 쿼리로그 출력하기 (log4jdbc 사용)
+### 1) 의존성 추가
 
-1. 의존성추가
+쿼리 로그를 출력하려면 `log4jdbc-log4j2` 라이브러리를 추가해야 합니다.
 
+```xml
 <dependency>
-	<groupId>org.bgee.log4jdbc-log4j2</groupId>
-	<artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
-	<version>1.16</version>
-</dependency>	
+    <groupId>org.bgee.log4jdbc-log4j2</groupId>
+    <artifactId>log4jdbc-log4j2-jdbc4.1</artifactId>
+    <version>1.16</version>
+</dependency>
+```
 
-2. application.yml 수정
+### 2) `application.yml` 수정
 
-# 1) datasource 에 log4jdbc 및 driver class name 설정
+`log4jdbc`를 통해 쿼리 로그를 출력하기 위해 데이터소스와 드라이버 설정을 아래와 같이 추가합니다.
 
+```yaml
+spring:
   datasource:
     url: jdbc:log4jdbc:mysql://localhost:3306/dbelespoglog?serverTimezone=UTC&characterEncoding=UTF-8
     username: user1
     password: 1234
     driver-class-name: net.sf.log4jdbc.sql.jdbcapi.DriverSpy
 
-# 2) logback 설정파일 위치 지정
+# Logback 설정 파일 위치 지정
+logging.config: classpath:logback-local.xml
+```
 
-logging.config: classpath:logback-local.xml 
+### 3) `log4jdbc.log4j2.properties` 파일 추가
 
-3. src/main/resources 에 log4jdbc.log4j2.properties 추가(근데 삭제해도 되는데? -> ai 확인하기)
+다음과 같은 속성을 `src/main/resources` 경로에 있는 `log4jdbc.log4j2.properties` 파일에 추가합니다. (해당 파일은 삭제해도 큰 문제는 없습니다.)
 
+```properties
 log4jdbc.spylogdelegator.name=net.sf.log4jdbc.log.slf4j.Slf4jSpyLogDelegator
 log4jdbc.dump.sql.maxlinelength=0
+```
 
-4. logback.xml 설정
+## 3. `logback.xml` 설정
 
+다음은 `logback.xml` 파일을 통한 설정 예시입니다. 로그는 콘솔과 파일에 모두 기록되며, 쿼리 로그를 포함해 다양한 로그를 출력할 수 있습니다.
+
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
@@ -71,7 +89,6 @@ log4jdbc.dump.sql.maxlinelength=0
         </rollingPolicy>
     </appender>
 
-
     <!-- SQL 쿼리 로깅 설정 -->
     <logger name="jdbc.sqlonly" level="INFO" additivity="false">
         <appender-ref ref="CONSOLE" />
@@ -96,6 +113,11 @@ log4jdbc.dump.sql.maxlinelength=0
         <appender-ref ref="FILE" />
     </root>
 
-
-
 </configuration>
+```
+
+이 설정을 통해 Spring Boot에서 콘솔 및 파일로 로깅을 출력하고, `log4jdbc`를 사용하여 SQL 쿼리 로그를 확인할 수 있습니다.
+
+### 참고 사항
+- `log4jdbc.log4j2.properties` 파일은 쿼리 로그 출력을 위한 추가 설정이지만, 삭제해도 기본 동작에는 문제가 없습니다.
+- 로그 파일의 경로와 패턴, 크기, 유지 기간 등을 적절히 설정하여 원하는 로그 관리 방식을 구성할 수 있습니다.
