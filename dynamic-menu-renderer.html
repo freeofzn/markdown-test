@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      .epl-menu-v2-menu-container {
+        width: 200px;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        background-color: white;
+        font-family: Arial, sans-serif;
+      }
+
+      .epl-menu-v2-menu-item {
+        cursor: pointer;
+        user-select: none;
+      }
+
+      .epl-menu-v2-menu-header {
+        background-color: #fff7ed;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+
+      .epl-menu-v2-menu-header:hover {
+        background-color: #ffedd5;
+      }
+
+      .epl-menu-v2-menu-content {
+        display: none;
+      }
+
+      .epl-menu-v2-menu-content.open {
+        display: block;
+      }
+
+      .epl-menu-v2-submenu-item {
+        padding: 8px 8px 8px 32px;
+        cursor: pointer;
+      }
+
+      .epl-menu-v2-submenu-item:hover {
+        background-color: #f3f4f6;
+      }
+
+      .epl-menu-v2-arrow {
+        width: 16px;
+        height: 16px;
+        display: inline-block;
+        text-align: center;
+        line-height: 16px;
+        transition: transform 0.2s;
+      }
+
+      .epl-menu-v2-arrow.open {
+        transform: rotate(90deg);
+      }
+
+      .epl-menu-v2-menu-icon {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="menuContainer" class="epl-menu-v2-menu-container"></div>
+
+    <script>
+      const menuData = [
+        { MENU_CODE: "ALL", MENU_NAME: "전체공개", URL: null, PARENT_MENU_CODE: null },
+        { MENU_CODE: "TODO", MENU_NAME: "TodoList", URL: "/todo", PARENT_MENU_CODE: "ALL" },
+        { MENU_CODE: "SALES", MENU_NAME: "영업매뉴1", URL: null, PARENT_MENU_CODE: null },
+        { MENU_CODE: "SALES2", MENU_NAME: "영업매뉴2", URL: "/sales2", PARENT_MENU_CODE: "SALES" },
+        { MENU_CODE: "SALES3", MENU_NAME: "영업매뉴3", URL: "/sales3", PARENT_MENU_CODE: "SALES" },
+        { MENU_CODE: "ADMIN", MENU_NAME: "관리자", URL: null, PARENT_MENU_CODE: null },
+        { MENU_CODE: "MENU_MANAGE", MENU_NAME: "매뉴관리", URL: "/menu", PARENT_MENU_CODE: "ADMIN" },
+        { MENU_CODE: "AUTH_MANAGE", MENU_NAME: "권한관리", URL: "/auth", PARENT_MENU_CODE: "ADMIN" },
+        { MENU_CODE: "AUTH_MENU_MANAGE", MENU_NAME: "관한매뉴관리", URL: "/auth-menu", PARENT_MENU_CODE: "ADMIN" },
+      ];
+
+      function buildMenuTree(menuList) {
+        const menuMap = {};
+        const rootMenus = [];
+
+        menuList.forEach((menu) => {
+          menuMap[menu.MENU_CODE] = {
+            ...menu,
+            children: [],
+          };
+        });
+
+        menuList.forEach((menu) => {
+          if (menu.PARENT_MENU_CODE) {
+            const parentMenu = menuMap[menu.PARENT_MENU_CODE];
+            if (parentMenu) {
+              parentMenu.children.push(menuMap[menu.MENU_CODE]);
+            }
+          } else {
+            rootMenus.push(menuMap[menu.MENU_CODE]);
+          }
+        });
+
+        return rootMenus;
+      }
+
+      function createMenuHTML(menu, level = 0) {
+        const hasChildren = menu.children && menu.children.length > 0;
+        const menuItem = document.createElement("div");
+        menuItem.className = "epl-menu-v2-menu-item";
+
+        const menuHeader = document.createElement("div");
+        menuHeader.className = "epl-menu-v2-menu-header";
+
+        if (hasChildren) {
+          const arrow = document.createElement("span");
+          arrow.className = "epl-menu-v2-arrow open";
+          arrow.textContent = "▶";
+          menuHeader.appendChild(arrow);
+        }
+
+        if (menu.MENU_CODE === "TODO") {
+          const icon = document.createElement("span");
+          icon.className = "epl-menu-v2-menu-icon";
+          icon.innerHTML = "📋";
+          menuHeader.appendChild(icon);
+        }
+
+        const menuName = document.createElement("span");
+        menuName.textContent = menu.MENU_NAME;
+        menuHeader.appendChild(menuName);
+        menuItem.appendChild(menuHeader);
+
+        if (hasChildren) {
+          const menuContent = document.createElement("div");
+          menuContent.className = "epl-menu-v2-menu-content open";
+
+          menu.children.forEach((childMenu) => {
+            if (!childMenu.children || childMenu.children.length === 0) {
+              const submenuItem = document.createElement("div");
+              submenuItem.className = "epl-menu-v2-submenu-item";
+              submenuItem.textContent = childMenu.MENU_NAME;
+
+              if (childMenu.URL) {
+                submenuItem.addEventListener("click", () => {
+                  console.log(childMenu.URL);
+                });
+              }
+
+              menuContent.appendChild(submenuItem);
+            } else {
+              menuContent.appendChild(createMenuHTML(childMenu, level + 1));
+            }
+          });
+
+          menuItem.appendChild(menuContent);
+
+          menuHeader.addEventListener("click", (e) => {
+            const arrow = menuHeader.querySelector(".epl-menu-v2-arrow");
+            const content = menuItem.querySelector(".epl-menu-v2-menu-content");
+
+            arrow.classList.toggle("open");
+            content.classList.toggle("open");
+          });
+        }
+
+        return menuItem;
+      }
+
+      function initMenu() {
+        const container = document.getElementById("menuContainer");
+        const menuTree = buildMenuTree(menuData);
+
+        menuTree.forEach((menu) => {
+          container.appendChild(createMenuHTML(menu));
+        });
+      }
+
+      document.addEventListener("DOMContentLoaded", initMenu);
+    </script>
+  </body>
+</html>
